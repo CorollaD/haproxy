@@ -589,9 +589,17 @@ int ssl_sock_load_pem_into_ckch(const char *path, char *buf, struct ckch_data *d
 		}
 	}
 
+	ERR_clear_error();
 	/* Read Private Key */
 	key = PEM_read_bio_PrivateKey(in, NULL, NULL, NULL);
-	/* no need to check for errors here, because the private key could be loaded later */
+	ret = ERR_get_error();
+	if (key == NULL && (ret && !(ERR_GET_LIB(ret) == ERR_LIB_PEM && ERR_GET_REASON(ret) == PEM_R_NO_START_LINE))) {
+		memprintf(err, "%sunable to load private key from file '%s': %s::%s.\n",
+		          err && *err ? *err : "", path, ERR_lib_error_string(ret), ERR_reason_error_string(ret));
+		goto end;
+	}
+	/* We only check other errors than the absence of key because the
+	   private key could be loaded later in another file  */
 
 #ifndef OPENSSL_NO_DH
 	/* Seek back to beginning of file */
