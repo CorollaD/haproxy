@@ -610,8 +610,15 @@ int ssl_sock_load_pem_into_ckch(const char *path, char *buf, struct ckch_data *d
 	}
 
 	dh = ssl_sock_get_dh_from_bio(in);
+	ret = ERR_get_error();
+	if (dh == NULL && (ret && !(ERR_GET_LIB(ret) == ERR_LIB_PEM && ERR_GET_REASON(ret) == PEM_R_NO_START_LINE))) {
+		memprintf(err, "%sunable to load DH from file '%s': %s::%s.\n",
+		          err && *err ? *err : "", path, ERR_lib_error_string(ret), ERR_reason_error_string(ret));
+		goto end;
+	}
+	/* We only check other errors than the absence of DH because its not
+	   mandatory but we still want error if malformated */
 	ERR_clear_error();
-	/* no need to return an error there, dh is not mandatory */
 #endif
 
 	/* Seek back to beginning of file */
