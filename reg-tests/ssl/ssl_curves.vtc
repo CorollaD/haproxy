@@ -75,6 +75,7 @@ haproxy h1 -conf {
     listen ssl1-lst
         bind "${tmpdir}/ssl1.sock" ssl crt ${testdir}/common.pem ca-file ${testdir}/set_cafile_rootCA.crt verify optional curves P-256:P-384
         server s1 ${s1_addr}:${s1_port}
+        http-response add-header x-ssl-fc-curve-name %[ssl_fc_curve]
 
     # The prime256v1 curve, which is used by default by a backend when no
     # 'curves' or 'ecdhe' option is specified, is not allowed on this listener
@@ -98,6 +99,7 @@ haproxy h1 -conf {
 
         bind "${tmpdir}/ssl-ecdhe-256.sock" ssl crt ${testdir}/common.pem ca-file ${testdir}/set_cafile_rootCA.crt verify optional ecdhe prime256v1
         server s1 ${s1_addr}:${s1_port}
+        http-response add-header x-ssl-fc-curve-name %[ssl_fc_curve]
 
 } -start
 
@@ -105,6 +107,7 @@ client c1 -connect ${h1_clearlst_sock} {
   txreq
   rxresp
   expect resp.status == 200
+  expect resp.http.x-ssl-fc-curve-name == "prime256v1"
 } -run
 
 # The backend tries to use the prime256v1 curve that is not accepted by the
@@ -129,6 +132,7 @@ client c4 -connect ${h1_clearlst_sock} {
   txreq -url "/ecdhe-256"
   rxresp
   expect resp.status == 200
+  expect resp.http.x-ssl-fc-curve-name == "prime256v1"
 } -run
 
 syslog Slg_cust_fmt -wait

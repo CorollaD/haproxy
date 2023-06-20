@@ -46,6 +46,7 @@ haproxy h1 -conf {
         http-response add-header x-ssl-s_serial %[ssl_c_serial,hex]
         http-response add-header x-ssl-key_alg %[ssl_c_key_alg]
         http-response add-header x-ssl-version %[ssl_c_version]
+        http-response add-header x-ssl-curve-name %[ssl_fc_curve]
 
         bind "${tmpdir}/ssl.sock" ssl crt ${testdir}/common.pem ca-file ${testdir}/ca-auth.crt verify optional crt-ignore-err all crl-file ${testdir}/crl-auth.pem
 
@@ -69,6 +70,7 @@ client c1 -connect ${h1_clearlst_sock} {
     expect resp.http.x-ssl-s_serial == "02"
     expect resp.http.x-ssl-key_alg == "rsaEncryption"
     expect resp.http.x-ssl-version == "1"
+    expect resp.http.x-ssl-curve-name == "X25519"
 } -run
 
 

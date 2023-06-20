@@ -20646,6 +20646,10 @@ ssl_bc_cipher : string
   over an SSL/TLS transport layer. It can be used in a tcp-check or an
   http-check ruleset.
 
+ssl_bc_curve : string
+  Returns the name of the curve used in the key agreement when the outgoing
+  connection was made over an SSL/TLS transport layer.
+
 ssl_bc_client_random : binary
   Returns the client random of the back connection when the incoming connection
   was made over an SSL/TLS transport layer. It is useful to to decrypt traffic
@@ -20943,6 +20947,10 @@ ssl_fc_alpn : string
 ssl_fc_cipher : string
   Returns the name of the used cipher when the incoming connection was made
   over an SSL/TLS transport layer.
+
+ssl_fc_curve : string
+  Returns the name of the curve used in the key agreement when the incoming
+  connection was made over an SSL/TLS transport layer.
 
 ssl_fc_cipherlist_bin([<filter_option>]) : binary
   Returns the binary form of the client hello cipher list. The maximum
