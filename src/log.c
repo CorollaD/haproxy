@@ -621,6 +621,8 @@ int parse_logformat_string(const char *fmt, struct proxy *curproxy, struct list 
 			break;
 
 		case LF_VAR:                           // text part of a variable name
+			/* add array TAG <> sample + add_sample_to_logformat_list */
+						       //
 			var_len = str - var;
 			if (!isalnum((unsigned char)*str))
 				cformat = LF_INIT;     // not variable name anymore

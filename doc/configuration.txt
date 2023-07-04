@@ -10228,6 +10228,10 @@ no option logasap
                                  yes   |    yes   |   yes  |   no
   Arguments : none
 
+/* Add details about "+"  in the timers */
+
+
+
   By default, logs are emitted when all the log format variables and sample
   fetches used in the definition of the log-format string return a value, or
   when the session is terminated. This allows the built in log-format strings
@@ -22666,6 +22670,8 @@ are marked with a star ('*') after the field name below.
       9   actconn '/' feconn '/' beconn '/' srv_conn '/' retries*    0/0/0/0/3
      10   srv_queue '/' backend_queue                                      0/0
 
+/* use names for new samples */
+
 Detailed fields description :
   - "client_ip" is the IP address of the client which initiated the TCP
     connection to HAProxy. If the connection was accepted on a UNIX socket
@@ -23271,6 +23277,13 @@ Flags are :
 
 Please refer to the table below for currently defined variables :
 
+/* notes
+
+converter "addplus" (not final name)
+
+*/
+
+
   +---+------+-----------------------------------------------+-------------+
   | R | var  | field name (8.2.2 and 8.2.3 for description)  | type        |
   +---+------+-----------------------------------------------+-------------+
@@ -23450,6 +23463,10 @@ Timings events in TCP mode:
       | Th   Tw   Tc   Td |
       |<------ Tt ------->|
 
+
+/* fc.timer.handshake */
+
+
   - Th: total time to accept tcp connection and execute handshakes for low level
     protocols. Currently, these protocols are proxy-protocol and SSL. This may
     only happen once during the whole connection's lifetime. A large time here
@@ -23461,6 +23478,9 @@ Timings events in TCP mode:
     all request to calculate the amortized value. The second and subsequent
     request will always report zero here.
 
+
+/* req.timer.idle */
+
   - Ti: is the idle time before the HTTP request (HTTP mode only). This timer
     counts between the end of the handshakes and the first byte of the HTTP
     request. When dealing with a second request in keep-alive mode, it starts
@@ -23471,6 +23491,9 @@ Timings events in TCP mode:
     pending until they need it. This delay will be reported as the idle time. A
     value of -1 indicates that nothing was received on the connection.
 
+
+/* req.timer.hdr */
+
   - TR: total time to get the client request (HTTP mode only). It's the time
     elapsed between the first bytes received and the moment the proxy received
     the empty line marking the end of the HTTP headers. The value "-1"
@@ -23478,6 +23501,9 @@ Timings events in TCP mode:
     the client closes prematurely or times out. This time is usually very short
     since most requests fit in a single packet. A large time may indicate a
     request typed by hand during a test.
+
+/* req.timer.tq  ? */
+/* It's legacy ! */
 
   - Tq: total time to get the client request from the accept date or since the
     emission of the last byte of the previous response (HTTP mode only). It's
@@ -23487,17 +23513,23 @@ Timings events in TCP mode:
     it in favor of TR nowadays, as the idle time adds a lot of noise to the
     reports.
 
+/* req.timer.queue */
+
   - Tw: total time spent in the queues waiting for a connection slot. It
     accounts for backend queue as well as the server queues, and depends on the
     queue size, and the time needed for the server to complete previous
     requests. The value "-1" means that the request was killed before reaching
     the queue, which is generally what happens with invalid or denied requests.
 
+/* bc.timer.connect */
+
   - Tc: total time to establish the TCP connection to the server. It's the time
     elapsed between the moment the proxy sent the connection request, and the
     moment it was acknowledged by the server, or between the TCP SYN packet and
     the matching SYN/ACK packet in return. The value "-1" means that the
     connection never established.
+
+/* res.timer.hdr */
 
   - Tr: server response time (HTTP mode only). It's the time elapsed between
     the moment the TCP connection was established to the server and the moment
@@ -23511,6 +23543,13 @@ Timings events in TCP mode:
     header (empty line) was never seen, most likely because the server timeout
     stroke before the server managed to process the request.
 
+/* txn.timer.data */
+  - Td:
+
+
+
+/* txn.timer.total */
+
   - Ta: total active time for the HTTP request, between the moment the proxy
     received the first byte of the request header and the emission of the last
     byte of the response body. The exception is when the "logasap" option is
@@ -23523,6 +23562,8 @@ Timings events in TCP mode:
     Timers with "-1" values have to be excluded from this equation. Note that
     "Ta" can never be negative.
 
+/* fc.timer.total */
+
   - Tt: total session duration time, between the moment the proxy accepted it
     and the moment both ends were closed. The exception is when the "logasap"
     option is specified. In this case, it only equals (Th+Ti+TR+Tw+Tc+Tr), and
@@ -23534,6 +23575,9 @@ Timings events in TCP mode:
     Timers with "-1" values have to be excluded from this equation. In TCP
     mode, "Ti", "Tq" and "Tr" have to be excluded too. Note that "Tt" can never
     be negative and that for HTTP, Tt is simply equal to (Th+Ti+Ta).
+
+
+/* txn.timer.user */
 
   - Tu: total estimated time as seen from client, between the moment the proxy
     accepted it and the moment both ends were closed, without idle time.
