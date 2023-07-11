@@ -141,19 +141,8 @@ static const struct logformat_type logformat_keywords[] = {
 	{ "ID", LOG_FMT_UNIQUEID, PR_MODE_TCP, LW_BYTES, NULL }, /* Unique ID */
 	{ "ST", LOG_FMT_STATUS, PR_MODE_TCP, LW_RESP, NULL },   /* status code */
 	{ "T", LOG_FMT_DATEGMT, PR_MODE_TCP, LW_INIT, NULL },   /* date GMT */
-	{ "Ta", LOG_FMT_Ta, PR_MODE_HTTP, LW_BYTES, NULL },      /* Time active (tr to end) */
-	{ "Tc", LOG_FMT_TC, PR_MODE_TCP, LW_BYTES, NULL },       /* Tc */
-	{ "Th", LOG_FMT_Th, PR_MODE_TCP, LW_BYTES, NULL },       /* Time handshake */
-	{ "Ti", LOG_FMT_Ti, PR_MODE_HTTP, LW_BYTES, NULL },      /* Time idle */
 	{ "Tl", LOG_FMT_DATELOCAL, PR_MODE_TCP, LW_INIT, NULL }, /* date local timezone */
-	{ "Tq", LOG_FMT_TQ, PR_MODE_HTTP, LW_BYTES, NULL },      /* Tq=Th+Ti+TR */
-	{ "Tr", LOG_FMT_Tr, PR_MODE_HTTP, LW_BYTES, NULL },      /* Tr */
-	{ "TR", LOG_FMT_TR, PR_MODE_HTTP, LW_BYTES, NULL },      /* Time to receive a valid request */
-	{ "Td", LOG_FMT_TD, PR_MODE_TCP, LW_BYTES, NULL },       /* Td = Tt - (Tq + Tw + Tc + Tr) */
 	{ "Ts", LOG_FMT_TS, PR_MODE_TCP, LW_INIT, NULL },   /* timestamp GMT */
-	{ "Tt", LOG_FMT_TT, PR_MODE_TCP, LW_BYTES, NULL },       /* Tt */
-	{ "Tu", LOG_FMT_TU, PR_MODE_TCP, LW_BYTES, NULL },       /* Tu = Tt -Ti */
-	{ "Tw", LOG_FMT_TW, PR_MODE_TCP, LW_BYTES, NULL },       /* Tw */
 	{ "U", LOG_FMT_BYTES_UP, PR_MODE_TCP, LW_BYTES, NULL },  /* bytes from client to server */
 	{ "ac", LOG_FMT_ACTCONN, PR_MODE_TCP, LW_BYTES, NULL },  /* actconn */
 	{ "b", LOG_FMT_BACKEND, PR_MODE_TCP, LW_INIT, NULL },   /* backend */
@@ -4012,6 +4001,23 @@ static const struct tag2lf *find_tag2lf(const char *kw, int len)
 	return NULL;
 }
 
+/* tags that are aliases for sample timers */
+static struct tag2lf_list tag2lf_timers = {ILH, {
+	{ "Ta",   "txn.timer.total"      },
+	{ "Tu",   "txn.timer.user"       },
+	{ "Td",   "txn.timer.data"       },
+	{ "Tc",   "bc.timer.connect"     },
+	{ "Th",   "fc.timer.handshake"   },
+	{ "Tt",   "fc.timer.total"       },
+	{ "Ti",   "req.timer.idle"       },
+	{ "Tq",   "req.timer.tq"         },
+	{ "TR",   "req.timer.hdr"        },
+	{ "Tw",   "req.timer.queue"      },
+	{ "Tr",   "res.timer.hdr"        },
+	{ NULL,   NULL                      },
+}};
+
+INITCALL1(STG_REGISTER, log_register_tag2lf, &tag2lf_timers);
 
 /*
  * Local variables:
