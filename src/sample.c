@@ -1783,6 +1783,25 @@ static int sample_conv_bin2base64url(const struct arg *arg_p, struct sample *smp
 	return 1;
 }
 
+/* this function emulate the tags from log-format behavior and adds a + before
+ * the value when LW_BYTES is not met (option logasap) */
+static int sample_conv_lwbytes(const struct arg *args, struct sample *smp, void *private)
+{
+	struct buffer *temp;
+
+	temp = get_trash_chunk();
+
+	if (!(smp->px->to_log & LW_BYTES))
+		chunk_appendf(temp, "+%lld", smp->data.u.sint);
+	else
+		chunk_appendf(temp, "%lld", smp->data.u.sint);
+
+	smp->data.u.str = *temp;
+	smp->data.type = SMP_T_STR;
+	return 1;
+}
+
+
 /* This function returns a sample struct filled with the conversion of variable
  * <var> to sample type <type> (SMP_T_*), via a cast to the target type. If the
  * variable cannot be retrieved or casted, 0 is returned, otherwise 1.
@@ -4700,6 +4719,10 @@ static struct sample_conv_kw_list sample_conv_kws = {ILH, {
 	{ "jwt_payload_query", sample_conv_jwt_payload_query, ARG2(0,STR,STR), sample_conv_jwt_query_check,   SMP_T_BIN, SMP_T_ANY },
 	{ "jwt_verify",        sample_conv_jwt_verify,        ARG2(2,STR,STR), sample_conv_jwt_verify_check,  SMP_T_BIN, SMP_T_SINT },
 #endif
+
+	/* logs converter */
+	{ "lwbytes",   sample_conv_lwbytes,    0,                     NULL,                     SMP_T_SINT, SMP_T_STR  },
+
 	{ NULL, NULL, 0, 0, 0 },
 }};
 

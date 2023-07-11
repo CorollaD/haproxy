@@ -3945,18 +3945,18 @@ static const struct tag2lf *find_tag2lf(const char *kw, int len)
 
 /* tags that are aliases for sample timers */
 static struct tag2lf_list tag2lf_timers = {ILH, {
-	{ "Ta",   "txn.timer.total"      },
-	{ "Tu",   "txn.timer.user"       },
-	{ "Td",   "txn.timer.data"       },
-	{ "Tc",   "bc.timer.connect"     },
-	{ "Th",   "fc.timer.handshake"   },
-	{ "Tt",   "fc.timer.total"       },
-	{ "Ti",   "req.timer.idle"       },
-	{ "Tq",   "req.timer.tq"         },
-	{ "TR",   "req.timer.hdr"        },
-	{ "Tw",   "req.timer.queue"      },
-	{ "Tr",   "res.timer.hdr"        },
-	{ NULL,   NULL                      },
+	{ "Ta",   "txn.timer.total,lwbytes"      },
+	{ "Tu",   "txn.timer.user,lwbytes"       },
+	{ "Td",   "txn.timer.data"               },
+	{ "Tc",   "bc.timer.connect"             },
+	{ "Th",   "fc.timer.handshake"           },
+	{ "Tt",   "fc.timer.total,lwbytes"       },
+	{ "Ti",   "req.timer.idle"               },
+	{ "Tq",   "req.timer.tq"                 },
+	{ "TR",   "req.timer.hdr"                },
+	{ "Tw",   "req.timer.queue"              },
+	{ "Tr",   "res.timer.hdr"                },
+	{ NULL,   NULL                           },
 }};
 
 INITCALL1(STG_REGISTER, log_register_tag2lf, &tag2lf_timers);
