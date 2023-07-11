@@ -2424,66 +2424,6 @@ int sess_build_logline(struct session *sess, struct stream *s, char *dst, size_t
 				last_isspace = 0;
 				break;
 
-			case LOG_FMT_Th: // %Th = handshake time
-				ret = ltoa_o(logs->t_handshake, tmplog, dst + maxsize - tmplog);
-				if (ret == NULL)
-					goto out;
-				tmplog = ret;
-				last_isspace = 0;
-				break;
-
-			case LOG_FMT_Ti: // %Ti = HTTP idle time
-				ret = ltoa_o(logs->t_idle, tmplog, dst + maxsize - tmplog);
-				if (ret == NULL)
-					goto out;
-				tmplog = ret;
-				last_isspace = 0;
-				break;
-
-			case LOG_FMT_TR: // %TR = HTTP request time
-				ret = ltoa_o((t_request >= 0) ? t_request - logs->t_idle - logs->t_handshake : -1,
-				             tmplog, dst + maxsize - tmplog);
-				if (ret == NULL)
-					goto out;
-				tmplog = ret;
-				last_isspace = 0;
-				break;
-
-			case LOG_FMT_TQ: // %Tq = Th + Ti + TR
-				ret = ltoa_o(t_request, tmplog, dst + maxsize - tmplog);
-				if (ret == NULL)
-					goto out;
-				tmplog = ret;
-				last_isspace = 0;
-				break;
-
-			case LOG_FMT_TW: // %Tw
-				ret = ltoa_o((logs->t_queue >= 0) ? logs->t_queue - t_request : -1,
-						tmplog, dst + maxsize - tmplog);
-				if (ret == NULL)
-					goto out;
-				tmplog = ret;
-				last_isspace = 0;
-				break;
-
-			case LOG_FMT_TC: // %Tc
-				ret = ltoa_o((logs->t_connect >= 0) ? logs->t_connect - logs->t_queue : -1,
-						tmplog, dst + maxsize - tmplog);
-				if (ret == NULL)
-					goto out;
-				tmplog = ret;
-				last_isspace = 0;
-				break;
-
-			case LOG_FMT_Tr: // %Tr
-				ret = ltoa_o((logs->t_data >= 0) ? logs->t_data - logs->t_connect : -1,
-						tmplog, dst + maxsize - tmplog);
-				if (ret == NULL)
-					goto out;
-				tmplog = ret;
-				last_isspace = 0;
-				break;
-
 			case LOG_FMT_TD: // %Td
 				if (be->mode == PR_MODE_HTTP)
 					ret = ltoa_o((logs->t_data >= 0) ? logs->t_close - logs->t_data : -1,
