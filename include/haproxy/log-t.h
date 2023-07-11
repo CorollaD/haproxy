@@ -201,6 +201,20 @@ struct logformat_node {
 	void *expr;    // for use with LOG_FMT_EXPR
 };
 
+/* log-format tags to log-format string
+ * lf can only contain one expression */
+
+struct tag2lf {
+	const char *tag;
+	const char *lf;
+};
+
+/* list of tag2lf */
+struct tag2lf_list {
+	struct list list;
+	struct tag2lf kw[VAR_ARRAY];
+};
+
 /* Range of indexes for log sampling. */
 struct smp_log_range {
 	unsigned int low;        /* Low limit of the indexes of this range. */

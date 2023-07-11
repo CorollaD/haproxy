@@ -44,6 +44,12 @@
 #include <haproxy/time.h>
 #include <haproxy/tools.h>
 
+static int add_sample_to_logformat_list(const char *text, const char *arg, int arg_len, struct proxy *curpx, struct list *list_format, int options, int cap, char **err, char **endptr);
+static const struct tag2lf *find_tag2lf(const char *kw, int len);
+
+/* head list for tag to log-format conversion */
+struct list tag2lf_list = LIST_HEAD_INIT(tag2lf_list);
+
 /* global recv logs counter */
 int cum_log_messages;
 
@@ -308,6 +314,7 @@ int parse_logformat_var(char *arg, int arg_len, char *var, int var_len, struct p
 {
 	int j;
 	struct logformat_node *node = NULL;
+	const struct tag2lf *t2l;
 
 	for (j = 0; logformat_keywords[j].name; j++) { // search a log type
 		if (strlen(logformat_keywords[j].name) == var_len &&
@@ -344,6 +351,21 @@ int parse_logformat_var(char *arg, int arg_len, char *var, int var_len, struct p
 				goto error_free;
 			}
 		}
+	}
+
+	/* Not found in the list of lf tags, looks in the list of tag aliases */
+	t2l = find_tag2lf(var, var_len);
+	if (t2l) {
+		int res;
+
+		res = add_sample_to_logformat_list(t2l->lf, arg, arg_len, curproxy, list_format, 0, *defoptions, err, NULL);
+		if (!res) {
+			memprintf(err, "%s\n'%%[%s]' was transformed from the '%%%s' tag", *err, t2l->lf, t2l->tag);
+			indent_msg(err, 4);
+
+			goto error_free;
+		}
+		return 1;
 	}
 
 	j = var[var_len];
@@ -3965,6 +3987,31 @@ REGISTER_CONFIG_SECTION("log-forward", cfg_parse_log_forward, NULL);
 
 REGISTER_PER_THREAD_ALLOC(init_log_buffers);
 REGISTER_PER_THREAD_FREE(deinit_log_buffers);
+
+/*
+ * Register the list of tag aliases
+ */
+void log_register_tag2lf(struct tag2lf_list *t2ll)
+{
+	LIST_APPEND(&tag2lf_list, &t2ll->list);
+}
+
+/* look for a tag alias */
+static const struct tag2lf *find_tag2lf(const char *kw, int len)
+{
+	int index;
+	struct tag2lf_list *t2ll;
+
+	list_for_each_entry(t2ll, &tag2lf_list, list) {
+		for (index = 0; t2ll->kw[index].tag != NULL; index++) {
+			if (strncmp(t2ll->kw[index].tag, kw, len) == 0 &&
+			    t2ll->kw[index].tag[len] == '\0')
+				return &t2ll->kw[index];
+		}
+	}
+	return NULL;
+}
+
 
 /*
  * Local variables:
