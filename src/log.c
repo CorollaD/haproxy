@@ -407,9 +407,9 @@ int add_to_logformat_list(char *start, char *end, int type, struct list *list_fo
  *
  * In error case, the function returns 0, otherwise it returns 1.
  */
-int add_sample_to_logformat_list(char *text, char *arg, int arg_len, struct proxy *curpx, struct list *list_format, int options, int cap, char **err, char **endptr)
+static int add_sample_to_logformat_list(const char *text, const char *arg, int arg_len, struct proxy *curpx, struct list *list_format, int options, int cap, char **err, char **endptr)
 {
-	char *cmd[2];
+	const char *cmd[2];
 	struct sample_expr *expr = NULL;
 	struct logformat_node *node = NULL;
 	int cmd_arg;
@@ -418,7 +418,7 @@ int add_sample_to_logformat_list(char *text, char *arg, int arg_len, struct prox
 	cmd[1] = "";
 	cmd_arg = 0;
 
-	expr = sample_parse_expr(cmd, &cmd_arg, curpx->conf.args.file, curpx->conf.args.line, err,
+	expr = sample_parse_expr((char **)cmd, &cmd_arg, curpx->conf.args.file, curpx->conf.args.line, err,
 				 &curpx->conf.args, endptr);
 	if (!expr) {
 		memprintf(err, "failed to parse sample expression <%s> : %s", text, *err);
