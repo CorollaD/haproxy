@@ -4508,7 +4508,11 @@ static int smp_fetch_txn_timers(const struct arg *args, struct sample *smp, cons
 
 		/* txn.timer.data (%Td) */
 		case 'd':
+			/* if HTTP */
 			smp->data.u.sint = (logs->t_data >= 0) ? logs->t_close - logs->t_data : -1;
+			/* else if not HTTP
+			 * (logs->t_connect >= 0) ? logs->t_close - logs->t_connect : -1;
+			 */
 		break;
 
 		/* txn.timer.user (%Tu) */
