@@ -2136,116 +2136,6 @@ int sess_build_logline(struct session *sess, struct stream *s, char *dst, size_t
 				last_isspace = 0;
 				break;
 
-			case LOG_FMT_CLIENTIP:  // %ci
-				addr = (s ? sc_src(s->scf) : sess_src(sess));
-				if (addr)
-					ret = lf_ip(tmplog, (struct sockaddr *)addr, dst + maxsize - tmplog, tmp);
-				else
-					ret = lf_text_len(tmplog, NULL, 0, dst + maxsize - tmplog, tmp);
-
-				if (ret == NULL)
-					goto out;
-				tmplog = ret;
-				last_isspace = 0;
-				break;
-
-			case LOG_FMT_CLIENTPORT:  // %cp
-				addr = (s ? sc_src(s->scf) : sess_src(sess));
-				if (addr) {
-					/* sess->listener is always defined when the session's owner is an inbound connections */
-					if (addr->ss_family == AF_UNIX)
-						ret = ltoa_o(sess->listener->luid, tmplog, dst + maxsize - tmplog);
-					else
-						ret = lf_port(tmplog, (struct sockaddr *)addr, dst + maxsize - tmplog, tmp);
-				}
-				else
-					ret = lf_text_len(tmplog, NULL, 0, dst + maxsize - tmplog, tmp);
-
-				if (ret == NULL)
-					goto out;
-				tmplog = ret;
-				last_isspace = 0;
-				break;
-
-			case LOG_FMT_FRONTENDIP: // %fi
-				addr = (s ? sc_dst(s->scf) : sess_dst(sess));
-				if (addr)
-					ret = lf_ip(tmplog, (struct sockaddr *)addr, dst + maxsize - tmplog, tmp);
-				else
-					ret = lf_text_len(tmplog, NULL, 0, dst + maxsize - tmplog, tmp);
-
-				if (ret == NULL)
-					goto out;
-				tmplog = ret;
-				last_isspace = 0;
-				break;
-
-			case  LOG_FMT_FRONTENDPORT: // %fp
-				addr = (s ? sc_dst(s->scf) : sess_dst(sess));
-				if (addr) {
-					/* sess->listener is always defined when the session's owner is an inbound connections */
-					if (addr->ss_family == AF_UNIX)
-						ret = ltoa_o(sess->listener->luid, tmplog, dst + maxsize - tmplog);
-					else
-						ret = lf_port(tmplog, (struct sockaddr *)addr, dst + maxsize - tmplog, tmp);
-				}
-				else
-					ret = lf_text_len(tmplog, NULL, 0, dst + maxsize - tmplog, tmp);
-
-				if (ret == NULL)
-					goto out;
-				tmplog = ret;
-				last_isspace = 0;
-				break;
-
-			case LOG_FMT_BACKENDIP:  // %bi
-				if (be_conn && conn_get_src(be_conn))
-					ret = lf_ip(tmplog, (const struct sockaddr *)be_conn->src, dst + maxsize - tmplog, tmp);
-				else
-					ret = lf_text_len(tmplog, NULL, 0, dst + maxsize - tmplog, tmp);
-
-				if (ret == NULL)
-					goto out;
-				tmplog = ret;
-				last_isspace = 0;
-				break;
-
-			case LOG_FMT_BACKENDPORT:  // %bp
-				if (be_conn && conn_get_src(be_conn))
-					ret = lf_port(tmplog, (struct sockaddr *)be_conn->src, dst + maxsize - tmplog, tmp);
-				else
-					ret = lf_text_len(tmplog, NULL, 0, dst + maxsize - tmplog, tmp);
-
-				if (ret == NULL)
-					goto out;
-				tmplog = ret;
-				last_isspace = 0;
-				break;
-
-			case LOG_FMT_SERVERIP: // %si
-				if (be_conn && conn_get_dst(be_conn))
-					ret = lf_ip(tmplog, (struct sockaddr *)be_conn->dst, dst + maxsize - tmplog, tmp);
-				else
-					ret = lf_text_len(tmplog, NULL, 0, dst + maxsize - tmplog, tmp);
-
-				if (ret == NULL)
-					goto out;
-				tmplog = ret;
-				last_isspace = 0;
-				break;
-
-			case LOG_FMT_SERVERPORT: // %sp
-				if (be_conn && conn_get_dst(be_conn))
-					ret = lf_port(tmplog, (struct sockaddr *)be_conn->dst, dst + maxsize - tmplog, tmp);
-				else
-					ret = lf_text_len(tmplog, NULL, 0, dst + maxsize - tmplog, tmp);
-
-				if (ret == NULL)
-					goto out;
-				tmplog = ret;
-				last_isspace = 0;
-				break;
-
 			case LOG_FMT_DATE: // %t = accept date
 				get_localtime(logs->accept_date.tv_sec, &tm);
 				ret = date2str_log(tmplog, &tm, &logs->accept_date, dst + maxsize - tmplog);
@@ -3915,6 +3805,21 @@ static struct tag2lf_list tag2lf_timers = {ILH, {
 }};
 
 INITCALL1(STG_REGISTER, log_register_tag2lf, &tag2lf_timers);
+
+static struct tag2lf_list tag2lf_tags = {ILH, {
+	/* IP and ports tags */
+	{ "ci",   "src"                            },
+	{ "cp",   "src_port"                       },
+	{ "fi",   "dst"                            },
+	{ "fp",   "dst_port"                       },
+	{ "bi",   "bc_src"                         },
+	{ "bp",   "bc_src_port"                    },
+	{ "si",   "bc_dst"                         },
+	{ "sp",   "bc_dst_port"                    },
+	{ NULL,   NULL                             },
+}};
+
+INITCALL1(STG_REGISTER, log_register_tag2lf, &tag2lf_tags);
 
 /*
  * Local variables:
