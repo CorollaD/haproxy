@@ -2229,15 +2229,6 @@ int sess_build_logline(struct session *sess, struct stream *s, char *dst, size_t
 			}
 			break;
 
-			case LOG_FMT_FRONTEND: // %f
-				src = fe->id;
-				ret = lf_text(tmplog, src, dst + maxsize - tmplog, tmp);
-				if (ret == NULL)
-					goto out;
-				tmplog = ret;
-				last_isspace = 0;
-				break;
-
 			case LOG_FMT_FRONTEND_XPRT: // %ft
 				src = fe->id;
 				if (tmp->options & LOG_OPT_QUOTE)
@@ -2281,38 +2272,6 @@ int sess_build_logline(struct session *sess, struct stream *s, char *dst, size_t
 				last_isspace = 0;
 				break;
 #endif
-			case LOG_FMT_BACKEND: // %b
-				src = be->id;
-				ret = lf_text(tmplog, src, dst + maxsize - tmplog, tmp);
-				if (ret == NULL)
-					goto out;
-				tmplog = ret;
-				last_isspace = 0;
-				break;
-
-			case LOG_FMT_SERVER: // %s
-				switch (obj_type(s ? s->target : sess->origin)) {
-				case OBJ_TYPE_SERVER:
-					src = __objt_server(s->target)->id;
-					break;
-				case OBJ_TYPE_APPLET:
-					src = __objt_applet(s->target)->name;
-					break;
-				case OBJ_TYPE_CHECK:
-					src = (__objt_check(sess->origin)->server
-					       ? __objt_check(sess->origin)->server->id
-					       : "<NOSRV>");
-					break;
-				default:
-					src = "<NOSRV>";
-					break;
-				}
-				ret = lf_text(tmplog, src, dst + maxsize - tmplog, tmp);
-				if (ret == NULL)
-					goto out;
-				tmplog = ret;
-				last_isspace = 0;
-				break;
 
 			case LOG_FMT_STATUS: // %ST
 				ret = ltoa_o(status, tmplog, dst + maxsize - tmplog);
@@ -3816,6 +3775,11 @@ static struct tag2lf_list tag2lf_tags = {ILH, {
 	{ "bp",   "bc_src_port"                    },
 	{ "si",   "bc_dst"                         },
 	{ "sp",   "bc_dst_port"                    },
+	/* names */
+	{ "f",    "fe_name"                        },  /* TODO handle ft */
+	{ "b",    "be_name"                        },  /* TODO handle <NOSRV> */
+	{ "s",    "srv_name"                       },
+
 	{ NULL,   NULL                             },
 }};
 
