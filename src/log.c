@@ -2790,22 +2790,6 @@ int sess_build_logline(struct session *sess, struct stream *s, char *dst, size_t
 				last_isspace = 0;
 				break;
 
-			case LOG_FMT_PID: // %pid
-				if (tmp->options & LOG_OPT_HEXA) {
-					iret = snprintf(tmplog, dst + maxsize - tmplog, "%04X", pid);
-					if (iret < 0 || iret > dst + maxsize - tmplog)
-						goto out;
-					last_isspace = 0;
-					tmplog += iret;
-				} else {
-					ret = ltoa_o(pid, tmplog, dst + maxsize - tmplog);
-					if (ret == NULL)
-						goto out;
-					tmplog = ret;
-					last_isspace = 0;
-				}
-				break;
-
 			case LOG_FMT_UNIQUEID: // %ID
 				ret = NULL;
 				if (s)
@@ -3780,6 +3764,8 @@ static struct tag2lf_list tag2lf_tags = {ILH, {
 	{ "b",    "be_name"                        },  /* TODO handle <NOSRV> */
 	{ "s",    "srv_name"                       },
 
+	/* others */
+	{ "pid",  "pid"                            },
 	{ NULL,   NULL                             },
 }};
 
