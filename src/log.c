@@ -2424,51 +2424,6 @@ int sess_build_logline(struct session *sess, struct stream *s, char *dst, size_t
 				last_isspace = 0;
 				break;
 
-			case LOG_FMT_TD: // %Td
-				if (be->mode == PR_MODE_HTTP)
-					ret = ltoa_o((logs->t_data >= 0) ? logs->t_close - logs->t_data : -1,
-					             tmplog, dst + maxsize - tmplog);
-				else
-					ret = ltoa_o((logs->t_connect >= 0) ? logs->t_close - logs->t_connect : -1,
-					             tmplog, dst + maxsize - tmplog);
-				if (ret == NULL)
-					goto out;
-				tmplog = ret;
-				last_isspace = 0;
-				break;
-
-			case LOG_FMT_Ta:  // %Ta = active time = Tt - Th - Ti
-				if (!(fe->to_log & LW_BYTES))
-					LOGCHAR('+');
-				ret = ltoa_o(logs->t_close - (logs->t_idle >= 0 ? logs->t_idle + logs->t_handshake : 0),
-					     tmplog, dst + maxsize - tmplog);
-				if (ret == NULL)
-					goto out;
-				tmplog = ret;
-				last_isspace = 0;
-				break;
-
-			case LOG_FMT_TT:  // %Tt = total time
-				if (!(fe->to_log & LW_BYTES))
-					LOGCHAR('+');
-				ret = ltoa_o(logs->t_close, tmplog, dst + maxsize - tmplog);
-				if (ret == NULL)
-					goto out;
-				tmplog = ret;
-				last_isspace = 0;
-				break;
-
-			case LOG_FMT_TU:  // %Tu = total time seen by user = Tt - Ti
-				if (!(fe->to_log & LW_BYTES))
-					LOGCHAR('+');
-				ret = ltoa_o(logs->t_close - (logs->t_idle >= 0 ? logs->t_idle : 0),
-					     tmplog, dst + maxsize - tmplog);
-				if (ret == NULL)
-					goto out;
-				tmplog = ret;
-				last_isspace = 0;
-				break;
-
 			case LOG_FMT_STATUS: // %ST
 				ret = ltoa_o(status, tmplog, dst + maxsize - tmplog);
 				if (ret == NULL)
