@@ -2340,22 +2340,6 @@ int sess_build_logline(struct session *sess, struct stream *s, char *dst, size_t
 				last_isspace = 0;
 				break;
 
-			case LOG_FMT_FECONN:  // %fc
-				ret = ltoa_o(fe->feconn, tmplog, dst + maxsize - tmplog);
-				if (ret == NULL)
-					goto out;
-				tmplog = ret;
-				last_isspace = 0;
-				break;
-
-			case LOG_FMT_BECONN:  // %bc
-				ret = ltoa_o(be->beconn, tmplog, dst + maxsize - tmplog);
-				if (ret == NULL)
-					goto out;
-				tmplog = ret;
-				last_isspace = 0;
-				break;
-
 			case LOG_FMT_SRVCONN:  // %sc
 				switch (obj_type(s ? s->target : sess->origin)) {
 				case OBJ_TYPE_SERVER:
@@ -3763,6 +3747,10 @@ static struct tag2lf_list tag2lf_tags = {ILH, {
 	{ "f",    "fe_name"                        },  /* TODO handle ft */
 	{ "b",    "be_name"                        },  /* TODO handle <NOSRV> */
 	{ "s",    "srv_name"                       },
+	/* conn */
+	{ "ac",   "act_conn"                      },
+	{ "bc",   "be_conn"                       },
+	{ "fc",   "fe_conn"                       },
 
 	/* others */
 	{ "pid",  "pid"                            },
